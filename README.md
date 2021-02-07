@@ -3,6 +3,8 @@ ets_pkg01 README.md:
 
 This is my first ROS package. It was built to examine the ROS messages from the Magni robot. 
 
+Environment: ubuntu 16.04, ROS Kinetic Kame, python 2.7 
+
 The main applications are the following: 
 
 - robot_safety      - To notify when battery is low or object is too close to robot. 
@@ -27,6 +29,19 @@ rosrun ets_pkg01 add_two_ints_server.py
 rosrun ets_pkg01 listener.py 
 
 rosrun ets_pkg01 talker.py 
+
+Also: 
+
+cd /home/edmond/catkin_ws/src/ets_pkg01/scripts/ 
+
+python2 sonar_listener.py 
+
+python2 watch_battery.py 
+
+python2 display_sonar.py 
+
+python2 robot_safety.py 
+
 
 The code was based on the ROS Tutorial instructions: 
 
