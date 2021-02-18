@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# File: robot_safety.py 
+# File: robot_safety.py
 # Function: To notify when battery is low or object is too close to robot. 
 # Modified by EdSeymore17 01/31/2021 
-# Change: 02/02/2021 02/03/2021 02/04/2021 02/05/2021
+# Change: 02/02/2021 02/03/2021 02/04/2021 02/05/2021 02/18/2021 
 #
 # Software License Agreement (BSD License)
 #
@@ -43,6 +43,7 @@
 ## to the 'chatter' topic
 
 import rospy 
+from std_msgs.msg import String
 from sensor_msgs.msg import Range         # [sonar]
 from sensor_msgs.msg import BatteryState
 
@@ -120,6 +121,7 @@ class RobotSafety(object):
     self.rpt_voltage      = True
     self.rpt_percentage   = False
     self.rpt_distance     = False
+    self.req_stop_front   = False
     # self.value            = 0 
     self.cnt1             = 0       # Sonar information.
     self.limit1           = 1
@@ -133,6 +135,28 @@ class RobotSafety(object):
     self.new_voltage      = 0       # Remember prior value.
     self.prior_voltage    = 0       # Remember prior value.
 
+    # Two stmts added 02/18/2021
+    print "Register system_control publisher"
+    self.pub = rospy.Publisher('/system_control', String, queue_size=10)
+
+  def stop_forward(self):     # ets 02/28/2021
+    # pub = rospy.Publisher('/system_control', String, queue_size=10)
+    # rospy.init_node('/system_control', anonymous=True)
+    # rate = rospy.Rate(1) # 10hz
+    if not rospy.is_shutdown():
+      msg_str = "speed_control disable"
+      rospy.loginfo(msg_str)
+      self.pub.publish(msg_str)
+
+  def resume_forward(self):   # ets 02/18/2021
+    # pub = rospy.Publisher('/system_control', String, queue_size=10)
+    # rospy.init_node('/system_control', anonymous=True)
+    # rate = rospy.Rate(1) # 10hz
+    if not rospy.is_shutdown():
+      msg_str = "speed_control enable"
+      rospy.loginfo(msg_str)
+      self.pub.publish(msg_str)
+ 
   def sonar_callback(self,data):
     # print "Sonar callback called"
     # self.sdt    = data.radiation_type
@@ -185,6 +209,20 @@ class RobotSafety(object):
               print "Distance L {:5.2f}, LF {:5.2f}, F {:5.2f} ,RF {:5.2f}, R {:5.2f} ".format(self.sd[4], self.sd[1], self.new_dist, self.sd[2], self.sd[0])
             if self.new_dist <= 0.20:
               print "Obstacle detected in front {:5.2f} meters".format(self.new_dist)
+              self.req_stop_front = True
+              try:
+                self.stop_forward()    # ets 02/18/2021
+              except rospy.ROSInterruptException:
+                print "\napp pub has ended"   # ets 02/18/2021
+                pass
+            else:
+              if self.req_stop_front == True:
+                self.req_stop_front = False
+                try:
+                  self.resume_forward() # ets 02/18/2021
+                except rospy.ROSInterruptException:
+                  print "\napp pub has ended"   # ets 02/18/2021
+                  pass
 
   def battery_callback(self,data):
     # print " Battery callback called"
