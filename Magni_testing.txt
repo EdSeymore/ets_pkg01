@@ -1,0 +1,11 @@
+Testing with remote roscore: 
+---------------------------- 
+ - R1: roscore 
+ - M1: roslaunch magni_bringup base.launch >/dev/null 2>&1 & 
+ - M1: roslaunch magni_demos simple_navigation.launch >/dev/null 2>&1 & 
+ - R2: rosnode list 
+ - M2: rostopic list 
+ - M3: rostopic echo /system_control 
+ - R3: rosrun ets_pkg01 robot_safety.py 
+ - R4: rosrun teleop_twist_keyboard teleop_twist_keyboard.py 
+ - Status: disable message published, Magni does not stop 
